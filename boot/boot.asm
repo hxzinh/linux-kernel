@@ -57,6 +57,8 @@ Addition:
     xor cx, cx
     call getInput
 
+    ;sth to add digit by digit
+
     ret
 
 Subtraction:
