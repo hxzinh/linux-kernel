@@ -1,0 +1,10 @@
+# How to debug real mode in gdb
+# /bin/sh
+# nasm -f bin boot.asm -o boot.bin
+# qemu-system-i386 -s -S boot.bin
+# gdb boot.bin
+
+target remote localhost:1234
+set architecture i8086
+b *0x7c00
+continue                              # now we can start debug using 'ni'
