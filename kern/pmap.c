@@ -476,6 +476,15 @@ page_insert(pde_t *pgdir, struct PageInfo *pp, void *va, int perm)
 	if(ptep == NULL) {
 		return -E_NO_MEM;
 	}
+
+	pp->pp_ref++;
+
+	// If there is already a page mapped at 'va', it should be page_remove()d.
+	if(*ptep & PTE_P) {
+		page_remove(pgdir, va);
+	}
+
+
 	return 0;
 }
 
@@ -494,7 +503,24 @@ struct PageInfo *
 page_lookup(pde_t *pgdir, void *va, pte_t **pte_store)
 {
 	// Fill this function in
-	return NULL;
+	// Get the page table entry for the virtual address va
+	pte_t * pte = pgdir_walk(pgdir, va, 0);
+
+	// Check if page table entry exist
+	if(pte == NULL || !(*pte && PTE_P)) {
+		return NULL;
+	}
+	
+	physaddr_t pa = PTE_ADDR(*pte);
+	struct PageInfo * page = pa2page(pa);
+
+	// If pte_store is not zero, then we store in it the address
+	// of the pte for this page. 
+	if(pte_store) {
+		*pte_store = pte;
+	}
+
+	return page;
 }
 
 //
