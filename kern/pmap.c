@@ -384,7 +384,31 @@ pte_t *
 pgdir_walk(pde_t *pgdir, const void *va, int create)
 {
 	// Fill this function in
-	return NULL;
+	pde_t * pgtb;
+	pde_t * pde;
+	
+	pde = &pgdir[PDX(va)];
+
+	cprintf("Here pde: %p\n", pde);
+
+	if(*pde & PTE_P) {
+		pgtb = (pde_t *) KADDR(PTE_ADDR(pde));
+	} 
+	else {
+		if(!create) {
+			return NULL;
+		}
+
+		struct PageInfo *pp = page_alloc(1);
+		if(!pp) {
+			return NULL;
+		}		
+		pp->pp_ref++;
+		pgtb = (pde_t *)page2kva(pp);
+		*pde = PADDR(pgtb) | PTE_P | PTE_W | PTE_U;
+	}
+
+	return &pgtb[PTX(va)];
 }
 
 //
@@ -434,6 +458,10 @@ int
 page_insert(pde_t *pgdir, struct PageInfo *pp, void *va, int perm)
 {
 	// Fill this function in
+	pde_t * ptep = pgdir_walk(pgdir, va, 1);
+	if(ptep == NULL) {
+		return -E_NO_MEM;
+	}
 	return 0;
 }
 
