@@ -385,13 +385,16 @@ pgdir_walk(pde_t *pgdir, const void *va, int create)
 {
 	// Fill this function in
 	pde_t * pgtab;
-	pde_t * pde;
+	pde_t * pde;    // page directory entry
 
+	// Get the page directory entry for the given virtual address (va)
 	pde = &pgdir[PDX(va)];
 
-	cprintf("Here pde: %p\n", pde);
+	cprintf("Page directory entry: %p\n", pde);
 
+	// Check if the page table is present if PTE_P bit is set
 	if(*pde & PTE_P) {
+		// Get virtual address of the page table
 		pgtab = (pde_t *) KADDR(PTE_ADDR(pde));
 	} 
 	else {
@@ -399,12 +402,17 @@ pgdir_walk(pde_t *pgdir, const void *va, int create)
 			return NULL;
 		}
 
-		struct PageInfo *pp = page_alloc(1);
+		struct PageInfo *pp = page_alloc(ALLOC_ZERO);
 		if(!pp) {
 			return NULL;
 		}		
 		pp->pp_ref++;
+
+		// get the kernel virtual address of new page table
 		pgtab = (pde_t *)page2kva(pp);
+
+		// set up new page directory entry with address of new page table 
+		// and set prsent, wtireable and use-accessible
 		*pde = PADDR(pgtab) | PTE_P | PTE_W | PTE_U;
 	}
 
@@ -426,7 +434,13 @@ static void
 boot_map_region(pde_t *pgdir, uintptr_t va, size_t size, physaddr_t pa, int perm)
 {
 	// Fill this function in
+	for(size_t i = 0; i < size; i += PGSIZE) {
+		// Get the page table entry for current virtual address
+		pte_t * pte = pgdir_walk(pgdir, (void *)(va + i), 1);
 
+		// Set the page table entry map to the pa with permissions
+		*pte = (pa + i) | perm | PTE_P;
+	}
 }
 
 //
