@@ -384,15 +384,15 @@ pte_t *
 pgdir_walk(pde_t *pgdir, const void *va, int create)
 {
 	// Fill this function in
-	pde_t * pgtb;
+	pde_t * pgtab;
 	pde_t * pde;
-	
+
 	pde = &pgdir[PDX(va)];
 
 	cprintf("Here pde: %p\n", pde);
 
 	if(*pde & PTE_P) {
-		pgtb = (pde_t *) KADDR(PTE_ADDR(pde));
+		pgtab = (pde_t *) KADDR(PTE_ADDR(pde));
 	} 
 	else {
 		if(!create) {
@@ -404,11 +404,11 @@ pgdir_walk(pde_t *pgdir, const void *va, int create)
 			return NULL;
 		}		
 		pp->pp_ref++;
-		pgtb = (pde_t *)page2kva(pp);
-		*pde = PADDR(pgtb) | PTE_P | PTE_W | PTE_U;
+		pgtab = (pde_t *)page2kva(pp);
+		*pde = PADDR(pgtab) | PTE_P | PTE_W | PTE_U;
 	}
 
-	return &pgtb[PTX(va)];
+	return &pgtab[PTX(va)];
 }
 
 //
