@@ -511,6 +511,7 @@ page_lookup(pde_t *pgdir, void *va, pte_t **pte_store)
 		return NULL;
 	}
 	
+	// Convert physical address in page table entry to a struct page pointer
 	physaddr_t pa = PTE_ADDR(*pte);
 	struct PageInfo * page = pa2page(pa);
 
@@ -542,6 +543,24 @@ void
 page_remove(pde_t *pgdir, void *va)
 {
 	// Fill this function in
+	pte_t * pte;
+
+	// Look up page with virtual address and store page table entry address to pte
+	struct PageInfo * pp = page_lookup(pgdir, va, &pte);
+
+	if(pp == NULL || !(*pte & PTE_P)) {
+		return;
+	}
+
+	// The ref count on the physical page should decrement.
+	page_decref(pp);
+
+	// The pg table entry corresponding to 'va' should be set to 0.
+	*pte = 0;
+
+	// The TLB must be invalidated if you remove an entry from
+	// the page table.
+	tlb_invalidate(pgdir, va);
 }
 
 //
