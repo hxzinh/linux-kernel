@@ -395,7 +395,7 @@ pgdir_walk(pde_t *pgdir, const void *va, int create)
 	// Check if the page table is present if PTE_P bit is set
 	if(*pde & PTE_P) {
 		// Get virtual address of the page table
-		pgtab = (pde_t *) KADDR(PTE_ADDR(pde));
+		pgtab = (pde_t *) KADDR(PTE_ADDR(*pde));
 	} 
 	else {
 		if(!create) {
@@ -472,18 +472,20 @@ int
 page_insert(pde_t *pgdir, struct PageInfo *pp, void *va, int perm)
 {
 	// Fill this function in
-	pde_t * ptep = pgdir_walk(pgdir, va, 1);
-	if(ptep == NULL) {
+	pte_t * pte = pgdir_walk(pgdir, va, 1);
+	if(pte == NULL) {
 		return -E_NO_MEM;
 	}
 
 	pp->pp_ref++;
 
 	// If there is already a page mapped at 'va', it should be page_remove()d.
-	if(*ptep & PTE_P) {
+	if(*pte & PTE_P) {
 		page_remove(pgdir, va);
+		tlb_invalidate(pgdir, va);
 	}
 
+	*pte = page2pa(pp) | perm | PTE_P; 
 
 	return 0;
 }
