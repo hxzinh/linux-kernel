@@ -24,6 +24,7 @@ struct Command {
 static struct Command commands[] = {
 	{ "help", "Display this list of commands", mon_help },
 	{ "kerninfo", "Display information about the kernel", mon_kerninfo },
+	{ "showmapping", "Display mapping information of address", mon_showmapping },
 };
 
 /***** Implementations of basic kernel monitor commands *****/
@@ -76,6 +77,34 @@ mon_backtrace(int argc, char **argv, struct Trapframe *tf)
 		cprintf("+%d\n", (int)(ebp[1] - info.eip_fn_addr));
 
 		ebp = (uint32_t *) *ebp;
+	}
+	return 0;
+}
+
+int
+mon_showmapping(int argc, char **argv, struct Trapframe *tf) 
+{
+	if(argc == 1) {
+		cprintf("Usage: showmapping [begin_address] [end_address]\n");
+		return 0;
+	}
+
+	if(!checkhex(argv[1]) || !checkhex(argv[2])) {
+		cprintf("Invalid address.\n");
+		return 0;
+	}
+
+	uint32_t begin = hextoi(argv[1]), end = hextoi(argv[2]);
+	for(; begin <= end; begin += PGSIZE) {
+		pte_t *pte = pgdir_walk(kern_pgdir, (void *) begin, 1);
+		// cprintf("va %08x: ", begin);
+		// if(pte == NULL)
+		// 	panic("error: out of memory");
+		// if(*pte & PTE_P) {
+		// 	cprintf("0x%08x ", PTE_ADDR(*pte));
+		// 	perm_print(*pte);
+		// 	cprintf("\n");
+		// }
 	}
 	return 0;
 }

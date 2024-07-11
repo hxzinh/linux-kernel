@@ -22,4 +22,8 @@ void *	memfind(const void *s, int c, size_t len);
 
 long	strtol(const char *s, char **endptr, int base);
 
+bool checkhex(char *s);
+uint32_t hextoi(char *s);
+void perm_print(uint32_t pte);
+
 #endif /* not JOS_INC_STRING_H */

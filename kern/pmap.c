@@ -393,7 +393,7 @@ pgdir_walk(pde_t *pgdir, const void *va, int create)
 	// Get the page directory entry for the given virtual address (va)
 	pde = &pgdir[PDX(va)];
 
-	cprintf("Page directory entry: %p\n", pde);
+	//cprintf("Page directory entry: %p\n", pde);
 
 	// Check if the page table is present if PTE_P bit is set
 	if(*pde & PTE_P) {

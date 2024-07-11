@@ -283,3 +283,35 @@ strtol(const char *s, char **endptr, int base)
 	return (neg ? -val : val);
 }
 
+bool checkhex(char *s) {
+	if(s[0] != '0' || (s[1] != 'x' && s[1] != 'X')) 
+		return 0;
+
+	return 1;
+}
+
+uint32_t hextoi(char *s) {
+	uint32_t res = 0, base = 16;
+
+	s += 2; // ignore 0x
+
+	while(*s) {
+		res = res * 16;
+		if(*s >= 'a') 
+			res += *s - 'a' + 10;
+		else if (*s >= 'A')
+			res += *s - 'A' + 10;
+		else 
+			res += *s - '0';
+		
+		s++;
+	}
+	return res;
+}
+
+void perm_print(uint32_t pte) {
+	cprintf("PTE_U : %d ", ((pte & PTE_U) != 0));
+	cprintf("PTE_W : %d ", ((pte & PTE_W) != 0));
+	cprintf("PTE_P : %d ", ((pte & PTE_P) != 0));
+	return;
+}
