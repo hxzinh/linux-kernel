@@ -308,10 +308,3 @@ uint32_t hextoi(char *s) {
 	}
 	return res;
 }
-
-void perm_print(uint32_t pte) {
-	cprintf("PTE_U : %d ", ((pte & PTE_U) != 0));
-	cprintf("PTE_W : %d ", ((pte & PTE_W) != 0));
-	cprintf("PTE_P : %d ", ((pte & PTE_P) != 0));
-	return;
-}

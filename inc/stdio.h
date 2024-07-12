@@ -2,6 +2,7 @@
 #define JOS_INC_STDIO_H
 
 #include <inc/stdarg.h>
+#include <inc/types.h>
 
 #ifndef NULL
 #define NULL	((void *) 0)
@@ -17,6 +18,7 @@ void	printfmt(void (*putch)(int, void*), void *putdat, const char *fmt, ...);
 void	vprintfmt(void (*putch)(int, void*), void *putdat, const char *fmt, va_list);
 int	snprintf(char *str, int size, const char *fmt, ...);
 int	vsnprintf(char *str, int size, const char *fmt, va_list);
+void perm_print(uint32_t pte);
 
 // lib/printf.c
 int	cprintf(const char *fmt, ...);

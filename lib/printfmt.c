@@ -7,6 +7,7 @@
 #include <inc/string.h>
 #include <inc/stdarg.h>
 #include <inc/error.h>
+#include <inc/mmu.h>
 
 /*
  * Space or zero padding and a field width are supported for the numeric
@@ -295,4 +296,9 @@ snprintf(char *buf, int n, const char *fmt, ...)
 	return rc;
 }
 
-
+void perm_print(uint32_t pte) {
+	cprintf("PTE_U : %d ", ((pte & PTE_U) != 0));
+	cprintf("PTE_W : %d ", ((pte & PTE_W) != 0));
+	cprintf("PTE_P : %d ", ((pte & PTE_P) != 0));
+	return;
+}

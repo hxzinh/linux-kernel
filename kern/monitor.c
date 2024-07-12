@@ -10,6 +10,7 @@
 #include <kern/console.h>
 #include <kern/monitor.h>
 #include <kern/kdebug.h>
+#include <kern/pmap.h>
 
 #define CMDBUF_SIZE	80	// enough for one VGA text line
 
@@ -84,7 +85,7 @@ mon_backtrace(int argc, char **argv, struct Trapframe *tf)
 int
 mon_showmapping(int argc, char **argv, struct Trapframe *tf) 
 {
-	if(argc == 1) {
+	if(argc != 3) {
 		cprintf("Usage: showmapping [begin_address] [end_address]\n");
 		return 0;
 	}
@@ -97,14 +98,17 @@ mon_showmapping(int argc, char **argv, struct Trapframe *tf)
 	uint32_t begin = hextoi(argv[1]), end = hextoi(argv[2]);
 	for(; begin <= end; begin += PGSIZE) {
 		pte_t *pte = pgdir_walk(kern_pgdir, (void *) begin, 1);
-		// cprintf("va %08x: ", begin);
-		// if(pte == NULL)
-		// 	panic("error: out of memory");
-		// if(*pte & PTE_P) {
-		// 	cprintf("0x%08x ", PTE_ADDR(*pte));
-		// 	perm_print(*pte);
-		// 	cprintf("\n");
-		// }
+		cprintf("va %08x: ", begin);
+		if(pte == NULL)
+			panic("error: out of memory");
+		if(*pte & PTE_P) {
+			cprintf("0x%08x ", PTE_ADDR(*pte));
+			perm_print(*pte);
+			cprintf("\n");
+		}
+		else {
+			cprintf("page not mapped\n");
+		}
 	}
 	return 0;
 }
