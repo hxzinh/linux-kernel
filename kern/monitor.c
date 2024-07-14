@@ -26,6 +26,7 @@ static struct Command commands[] = {
 	{ "help", "Display this list of commands", mon_help },
 	{ "kerninfo", "Display information about the kernel", mon_kerninfo },
 	{ "showmapping", "Display mapping information of address", mon_showmapping },
+	{ "setperm", "Change permissions of address", mon_setperm},
 };
 
 /***** Implementations of basic kernel monitor commands *****/
@@ -99,8 +100,9 @@ mon_showmapping(int argc, char **argv, struct Trapframe *tf)
 	for(; begin <= end; begin += PGSIZE) {
 		pte_t *pte = pgdir_walk(kern_pgdir, (void *) begin, 1);
 		cprintf("va %08x: ", begin);
-		if(pte == NULL)
+		if(pte == NULL) {
 			panic("error: out of memory");
+		}
 		if(*pte & PTE_P) {
 			cprintf("0x%08x ", PTE_ADDR(*pte));
 			perm_print(*pte);
@@ -113,6 +115,43 @@ mon_showmapping(int argc, char **argv, struct Trapframe *tf)
 	return 0;
 }
 
+int 
+mon_setperm(int argc, char **argv, struct Trapframe *tf) {
+	if(argc < 2 || argc > 5) {
+		cprintf("Usage: setperm [address] [PTE_U] [PTE_W] [PTE_P]\n");
+		return 0;
+	}
+
+	if(!checkhex(argv[1])) {
+		cprintf("Invalid address!\n");
+		return 0;
+	}
+
+	uint32_t addr = hextoi(argv[1]);
+	pte_t *pte = pgdir_walk(kern_pgdir, (void *) addr, 1);
+	if(pte == NULL) {
+		panic("error: Out of memory");
+	}
+
+	physaddr_t pa = PTE_ADDR(pte);
+	
+	int perm = 0;
+	if(argv[2][0] == '1') perm |= PTE_U;
+	if(argv[3][0] == '1') perm |= PTE_W;
+	if(argv[4][0] == '1') perm |= PTE_P;
+	boot_map_region(kern_pgdir, addr, PGSIZE, pa, perm);
+
+	cprintf("Before change: ");
+	perm_print(*pte); 
+	cprintf("\n");
+
+	*pte = (PTE_ADDR(*pte) & ~0x111) | perm;
+	cprintf("After change: ");
+	perm_print(*pte); 
+	cprintf("\n");
+
+	return 0;
+}
 
 
 /***** Kernel monitor command interpreter *****/

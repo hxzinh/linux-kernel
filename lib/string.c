@@ -296,7 +296,7 @@ uint32_t hextoi(char *s) {
 	s += 2; // ignore 0x
 
 	while(*s) {
-		res = res * 16;
+		res = res * base;
 		if(*s >= 'a') 
 			res += *s - 'a' + 10;
 		else if (*s >= 'A')
